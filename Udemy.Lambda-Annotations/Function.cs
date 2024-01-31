@@ -3,7 +3,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.Core;
-using AWSLambda11.Model;
+
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -25,10 +25,24 @@ public class Function
     /// <param name="context"></param>
     /// <returns></returns>
     [LambdaFunction]
-    [HttpApi(LambdaHttpMethod.Get,"users/{userId}")]    
+    [HttpApi(LambdaHttpMethod.Get, "users/{userId}")]
     public async Task<User> FunctionHandler(string userId, ILambdaContext context)
     {
-        return await _dynamodbcontext.LoadAsync<User>(userId);
-                
+        return await _dynamodbcontext.LoadAsync<User>(userId.ToString());
     }
+
+
+    [LambdaFunction]
+    [HttpApi(LambdaHttpMethod.Post, "users/")]
+    public async Task PostFunctionHandler([FromBody] User user, ILambdaContext context)
+    {
+        await _dynamodbcontext.SaveAsync(user);
+    }
+}
+public class User
+{
+    [DynamoDBHashKey]
+    public string Id { get; set; }
+    public string Nome { get; set; }
+
 }
